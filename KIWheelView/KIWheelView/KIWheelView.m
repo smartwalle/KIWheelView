@@ -184,6 +184,7 @@
             [self.container addSubview:view];
             
             UIImageView *iv = [[UIImageView alloc] initWithFrame:view.bounds];
+            [iv setContentMode:UIViewContentModeScaleAspectFit];
             [iv setImage:[UIImage imageNamed:@"section.png"]];
             [view addSubview:iv];
             
