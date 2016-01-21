@@ -15,24 +15,57 @@
 @property int value;
 @end
 
+@interface KIWheelSectionView ()
+@property (nonatomic, strong) UIImageView *backgroundImageView;
+@end
+
+@implementation KIWheelSectionView
+- (void)setFrame:(CGRect)frame {
+    [super setFrame:frame];
+    [self.backgroundImageView setFrame:self.bounds];
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    [self addSubview:self.backgroundImageView];
+    [self sendSubviewToBack:self.backgroundImageView];
+}
+
+- (UIImageView *)backgroundImageView {
+    if (_backgroundImageView == nil) {
+        _backgroundImageView = [[UIImageView alloc] init];
+        [_backgroundImageView setContentMode:UIViewContentModeScaleAspectFit];
+    }
+    return _backgroundImageView;
+}
+
+- (void)setBackgroundImage:(UIImage *)backgroundImage {
+    _backgroundImage = backgroundImage;
+    [self.backgroundImageView setImage:backgroundImage];
+}
+@end
+
 @implementation KIWheelSection
 @end
 
 @interface KIWheelView ()
 @property (nonatomic, assign) CGFloat           deltaAngle;
 @property (nonatomic, strong) UIView            *container;
+@property (nonatomic, strong) UIImageView       *containerImageView;
 @property (nonatomic, strong) NSMutableArray    *sections;
+@property (nonatomic, strong) NSMutableArray    *sectionViews;
 @property (nonatomic, assign) CGPoint           startPoint;
 @property (nonatomic, assign) CGAffineTransform startTransform;
 @property (nonatomic, assign) BOOL              touchBegin;
-@property (nonatomic, assign) NSInteger         selectedIndex;
 @property (nonatomic, assign) NSInteger         lastIndex;
+@property (nonatomic, assign) NSInteger         selectedIndex;
 @property (nonatomic, assign) CGPoint           originalPoint;
 
-@property (nonatomic, copy) KIWheelViewGetSectionViewBlock   wheelViewGetSectionViewBlock;
-@property (nonatomic, copy) KIWheelViewWillStartRotateBlock  wheelViewWillStartRotateBlock;
-@property (nonatomic, copy) KIWheelViewDidUpdateIndexBlcok   wheelViewDidUpdateIndexBlcok;
-@property (nonatomic, copy) KIWheelViewDidSelectedIndexBlock wheelViewDidSelectedIndexBlock;
+@property (nonatomic, copy) KIWheelViewDidLoadSectionViewBlock wheelViewDidLoadSectionViewBlock;
+@property (nonatomic, copy) KIWheelViewShouldStartRotateBlock  wheelViewShouldStartRotateBlock;
+@property (nonatomic, copy) KIWheelViewWillStartRotateBlock    wheelViewWillStartRotateBlock;
+@property (nonatomic, copy) KIWheelViewDidUpdateIndexBlcok     wheelViewDidUpdateIndexBlcok;
+@property (nonatomic, copy) KIWheelViewDidSelectedIndexBlock   wheelViewDidSelectedIndexBlock;
 @end
 
 @implementation KIWheelView
@@ -40,6 +73,7 @@
 - (void)setFrame:(CGRect)frame {
     [super setFrame:frame];
     [self.container setFrame:self.bounds];
+    [self.containerImageView setFrame:self.bounds];
     [self setOriginalPoint:CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds))];
 }
 
@@ -50,7 +84,13 @@
     
     CGFloat distance = [self distanceWithPoint:point toOriginalPoint:self.originalPoint];
     
-    if (distance > CGRectGetWidth(self.bounds)/2) {
+    if (self.wheelViewShouldStartRotateBlock != nil) {
+        if (self.wheelViewShouldStartRotateBlock(self) == NO) {
+            return;
+        }
+    }
+    
+    if (distance > CGRectGetWidth(self.bounds) / 2) {
         return;
     }
     
@@ -102,13 +142,13 @@
     
     NSInteger tempIndex = [self calculateIndex:YES];
     
-    if (tempIndex != self.selectedIndex) {
+//    if (tempIndex != self.selectedIndex) {
         self.selectedIndex = tempIndex;
         self.lastIndex = self.selectedIndex;
         if (self.wheelViewDidSelectedIndexBlock != nil) {
             self.wheelViewDidSelectedIndexBlock(self, self.selectedIndex);
         }
-    }
+//    }
 }
 
 #pragma mark - Methods
@@ -168,26 +208,28 @@
     CGPoint point = CGPointMake(CGRectGetWidth(self.container.bounds) / 2.0,
                                 CGRectGetHeight(self.container.bounds) / 2.0);
     
-    CGFloat angleSize = M_PI * 2 / self.numberOfSections;
-    
+    CGFloat angle = M_PI * 2 / self.numberOfSections;
     CGFloat perimeter = M_PI * CGRectGetWidth(self.bounds);
     CGFloat width = perimeter / self.numberOfSections;
     CGFloat height = CGRectGetHeight(self.container.bounds) / 2.0;
+
+    for (KIWheelSectionView *view in self.sectionViews) {
+        [view removeFromSuperview];
+    }
     
     for (int i=0; i<self.numberOfSections; i++) {
-        UIView *view = [self viewAtSection:i];
-        if (view != nil) {
-            [view setFrame:CGRectMake(0, 0, width, height)];
-            view.layer.anchorPoint = CGPointMake(0.5f, 1.0f);
-            view.layer.position    = point;
-            view.transform         = CGAffineTransformMakeRotation(angleSize * i);
-            [self.container addSubview:view];
-            
-            UIImageView *iv = [[UIImageView alloc] initWithFrame:view.bounds];
-            [iv setContentMode:UIViewContentModeScaleAspectFit];
-            [iv setImage:[UIImage imageNamed:@"section.png"]];
-            [view addSubview:iv];
-            
+        KIWheelSectionView *view = [[KIWheelSectionView alloc] init];
+        [view setFrame:CGRectMake(0, 0, width, height)];
+        view.layer.anchorPoint = CGPointMake(0.5f, 1.0f);
+        view.layer.position    = point;
+        view.transform         = CGAffineTransformMakeRotation(angle * i);
+        view.backgroundColor   = [UIColor clearColor];
+        [self.container addSubview:view];
+        
+        [self.sectionViews addObject:view];
+        
+        if (self.wheelViewDidLoadSectionViewBlock != nil) {
+            self.wheelViewDidLoadSectionViewBlock(self, i, view);
         }
     }
     
@@ -242,22 +284,63 @@
             self.lastIndex = index;
             [UIView animateWithDuration:animated ? 0.2 : 0 animations:^{
                 self.container.transform = CGAffineTransformRotate([self.container transform], section.midValue);
+            } completion:^(BOOL finished) {
+                if (self.wheelViewDidSelectedIndexBlock != nil) {
+                    self.wheelViewDidSelectedIndexBlock(self, self.selectedIndex);
+                }
             }];
         }
     }
 }
 
-- (UIView *)viewAtSection:(NSInteger)index {
-    if (self.wheelViewGetSectionViewBlock != nil) {
-        return self.wheelViewGetSectionViewBlock(self, index);
+- (KIWheelSectionView *)sectionViewAtIndex:(NSInteger)index {
+    if (index >= 0 && index < self.sectionViews.count) {
+        return self.sectionViews[index];
     }
     return nil;
 }
 
+- (void)reload {
+    [self buildWheel];
+}
+
 #pragma mark - Getters & Setters
 - (void)setNumberOfSections:(NSInteger)numberOfSections {
-    _numberOfSections = numberOfSections;
-    [self buildWheel];
+    if (_numberOfSections != numberOfSections) {
+        _numberOfSections = numberOfSections;
+        [self buildWheel];
+    }
+}
+
+- (void)setSectionImage:(UIImage *)sectionImage {
+    if (_sectionImage != sectionImage) {
+        _sectionImage = sectionImage;
+        for (KIWheelSectionView *view in self.sectionViews) {
+            [view setBackgroundImage:sectionImage];
+        }
+    }
+}
+
+- (void)setContainerImage:(UIImage *)containerImage {
+    if (_containerImage != containerImage) {
+        _containerImage = containerImage;
+        [self.containerImageView setImage:containerImage];
+        [self.containerImageView setContentMode:UIViewContentModeScaleAspectFit];
+        if (_containerImage == nil) {
+            [_containerImageView removeFromSuperview];
+            _containerImageView = nil;
+        } else {
+            [self.container addSubview:self.containerImageView];
+            [self.container sendSubviewToBack:self.containerImageView];
+        }
+    }
+}
+
+- (NSMutableArray *)sectionViews {
+    if (_sectionViews == nil) {
+        _sectionViews = [[NSMutableArray alloc] init];
+    }
+    return _sectionViews;
 }
 
 - (UIView *)container {
@@ -267,8 +350,19 @@
     return _container;
 }
 
-- (void)setViewForSectionBlock:(KIWheelViewGetSectionViewBlock)block {
-    [self setWheelViewGetSectionViewBlock:block];
+- (UIImageView *)containerImageView {
+    if (_containerImageView == nil) {
+        _containerImageView = [[UIImageView alloc] initWithFrame:self.bounds];
+    }
+    return _containerImageView;
+}
+
+- (void)setDidLoadSectionViewBlock:(KIWheelViewDidLoadSectionViewBlock)block {
+    [self setWheelViewDidLoadSectionViewBlock:block];
+}
+
+- (void)setShouldStartRotateBlock:(KIWheelViewShouldStartRotateBlock)block {
+    [self setWheelViewShouldStartRotateBlock:block];
 }
 
 - (void)setWillStartRotateBlcok:(KIWheelViewWillStartRotateBlock)block {
