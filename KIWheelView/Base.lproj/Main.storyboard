@@ -24,7 +24,6 @@
                                     <userDefinedRuntimeAttribute type="number" keyPath="numberOfSections">
                                         <integer key="value" value="6"/>
                                     </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="image" keyPath="sectionImage" value="section.png"/>
                                     <userDefinedRuntimeAttribute type="image" keyPath="containerImage" value="turn_table.png"/>
                                 </userDefinedRuntimeAttributes>
                             </view>
@@ -38,7 +37,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="section.png" width="123" height="161"/>
         <image name="turn_table.png" width="320" height="320"/>
     </resources>
 </document>

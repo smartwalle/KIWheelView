@@ -29,6 +29,7 @@
     [super layoutSubviews];
     [self addSubview:self.backgroundImageView];
     [self sendSubviewToBack:self.backgroundImageView];
+        self.backgroundColor = [UIColor yellowColor];
 }
 
 - (UIImageView *)backgroundImageView {
@@ -39,10 +40,82 @@
     return _backgroundImageView;
 }
 
+- (CGFloat)radianWithPoint:(CGPoint)point toOriginalPoint:(CGPoint)originalPoint {
+    double radian = 0;
+    double dx = ABS(point.x - originalPoint.x);
+    double dy = ABS(point.y - originalPoint.y);
+    radian = atan2(dy, dx);
+    
+//    if (point.x < originalPoint.x) {
+//        radian = M_PI - radian;
+//    }
+//    if (point.y > originalPoint.y) {
+//        radian = 2.0 * M_PI - radian;
+//    }
+//    if (radian > M_PI_2) {
+//        radian -= M_PI_2;
+//    } else {
+//        radian += 3 * M_PI * 0.5;
+//    }
+    
+    radian = ABS(2 * M_PI - radian);
+    
+    return radian;
+}
+
+- (void)drawRect:(CGRect)rect {
+    [super drawRect:rect];
+    
+    CGFloat radius = CGRectGetHeight(self.bounds);
+    CGFloat width = CGRectGetWidth(self.bounds);
+    CGPoint center = CGPointMake(width * 0.5, radius);
+    
+    // 一条直角边长为 width * 0.5, 斜边长为 radius, 根据勾股定理算出算出另一条直角边的长
+    CGFloat distance = sqrt(pow(radius, 2) - pow(width * 0.5, 2));
+    
+    CGPoint p1 = CGPointMake(width * 0.5 * -1, distance);
+    CGPoint p2 = CGPointMake(width * 0.5, distance);
+    
+    CGFloat r1 =  -M_PI_2-0.55;
+    CGFloat r2 =  -M_PI_2+0.55;
+    
+    NSLog(@"%f--%f", r1, -M_PI_2-0.55);
+    
+    // 画圆弧
+    // Center圆心
+    // radius:半径
+    // startAngle起始角度
+    // endAngle:结束角度
+    // clockwise:Yes 顺时针 No逆时针
+//    CGPoint center = CGPointMake(self.bounds.size.width * 0.5, self.bounds.size.height * 0.5);
+    //    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:center radius:100 startAngle:0 endAngle:M_PI_2 clockwise:NO];
+    
+    //    [path stroke];
+    
+    // 画扇形
+    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:center radius:radius startAngle:r1 endAngle:r2 clockwise:YES];
+    
+    [path addLineToPoint:center];
+    
+    //    [path addLineToPoint:CGPointMake(self.bounds.size.height * 0.5 + 100, self.bounds.size.height * 0.5)];
+    // 关闭路径:从路径的终点连接到起点
+    //    [path closePath];
+    // 设置填充颜色
+    [[UIColor redColor] setFill];
+    
+    // 设置描边颜色
+    [[UIColor greenColor] setStroke];
+    
+    //    [path stroke];
+    // 如果路径不是封闭的,默认会关闭路径
+    [path fill];
+}
+
 - (void)setBackgroundImage:(UIImage *)backgroundImage {
     _backgroundImage = backgroundImage;
     [self.backgroundImageView setImage:backgroundImage];
 }
+
 @end
 
 @implementation KIWheelSection
@@ -104,7 +177,7 @@
     self.startTransform = self.container.transform;
 	float dx = point.x  - self.container.center.x;
 	float dy = point.y  - self.container.center.y;
-	self.deltaAngle = atan2(dy,dx);
+	self.deltaAngle = atan2(dy, dx);
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -116,7 +189,7 @@
     
 	float dx = point.x  - self.container.center.x;
 	float dy = point.y  - self.container.center.y;
-	float ang = atan2(dy,dx);
+	float ang = atan2(dy, dx);
     float angleDif = self.deltaAngle - ang;
     CGAffineTransform newTrans = CGAffineTransformRotate(self.startTransform, -angleDif);
     self.container.transform = newTrans;
@@ -222,7 +295,7 @@
         [view setFrame:CGRectMake(0, 0, width, height)];
         view.layer.anchorPoint = CGPointMake(0.5f, 1.0f);
         view.layer.position    = point;
-        view.transform         = CGAffineTransformMakeRotation(angle * i);
+//        view.transform         = CGAffineTransformMakeRotation(angle * i);
         view.backgroundColor   = [UIColor clearColor];
         [self.container addSubview:view];
         
