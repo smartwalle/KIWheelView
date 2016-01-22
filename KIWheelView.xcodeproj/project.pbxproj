@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		180AF14C1C50E17200BB7F5C /* section@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 180AF14B1C50E17200BB7F5C /* section@2x.png */; };
 		187E54471C4F5FE3007EC394 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 187E54461C4F5FE3007EC394 /* main.m */; };
 		187E544A1C4F5FE3007EC394 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 187E54491C4F5FE3007EC394 /* AppDelegate.m */; };
 		187E544D1C4F5FE3007EC394 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 187E544C1C4F5FE3007EC394 /* ViewController.m */; };
@@ -17,7 +16,6 @@
 		187E546B1C4F5FE3007EC394 /* KIWheelViewUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 187E546A1C4F5FE3007EC394 /* KIWheelViewUITests.m */; };
 		187E547E1C4F6038007EC394 /* KIWheelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 187E547D1C4F6038007EC394 /* KIWheelView.m */; };
 		187E54851C4F7114007EC394 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 187E544E1C4F5FE3007EC394 /* Main.storyboard */; };
-		187E54951C4F8F24007EC394 /* turn_table@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 187E54941C4F8F24007EC394 /* turn_table@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +36,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		180AF14B1C50E17200BB7F5C /* section@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "section@2x.png"; sourceTree = "<group>"; };
 		187E54421C4F5FE3007EC394 /* KIWheelView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KIWheelView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		187E54461C4F5FE3007EC394 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		187E54481C4F5FE3007EC394 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -57,7 +54,6 @@
 		187E546C1C4F5FE3007EC394 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		187E547C1C4F6038007EC394 /* KIWheelView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KIWheelView.h; sourceTree = "<group>"; };
 		187E547D1C4F6038007EC394 /* KIWheelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KIWheelView.m; sourceTree = "<group>"; };
-		187E54941C4F8F24007EC394 /* turn_table@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "turn_table@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,8 +104,6 @@
 		187E54441C4F5FE3007EC394 /* KIWheelView */ = {
 			isa = PBXGroup;
 			children = (
-				180AF14B1C50E17200BB7F5C /* section@2x.png */,
-				187E54941C4F8F24007EC394 /* turn_table@2x.png */,
 				187E54781C4F5FFD007EC394 /* KIWheelView */,
 				187E54481C4F5FE3007EC394 /* AppDelegate.h */,
 				187E54491C4F5FE3007EC394 /* AppDelegate.m */,
@@ -262,10 +256,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				180AF14C1C50E17200BB7F5C /* section@2x.png in Resources */,
 				187E54551C4F5FE3007EC394 /* LaunchScreen.storyboard in Resources */,
 				187E54521C4F5FE3007EC394 /* Assets.xcassets in Resources */,
-				187E54951C4F8F24007EC394 /* turn_table@2x.png in Resources */,
 				187E54851C4F7114007EC394 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

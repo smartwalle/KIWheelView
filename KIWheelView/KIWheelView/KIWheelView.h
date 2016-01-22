@@ -28,9 +28,6 @@ IB_DESIGNABLE
 // 统一设置所有 Section 的背景图片
 @property (nonatomic, strong) IBInspectable UIImage   *sectionImage;
 
-// 设置 Container 的背景图片
-@property (nonatomic, strong) IBInspectable UIImage   *containerImage;
-
 - (UIView *)container;
 
 - (void)setDidLoadSectionViewBlock:(KIWheelViewDidLoadSectionViewBlock)block;

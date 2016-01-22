@@ -8,112 +8,51 @@
 
 #import "KIWheelView.h"
 #import <QuartzCore/QuartzCore.h>
+
 @interface KIWheelSection : NSObject
 @property float minValue;
 @property float maxValue;
 @property float midValue;
-@property int value;
+@property int   value;
 @end
 
 @interface KIWheelSectionView ()
-@property (nonatomic, strong) UIImageView *backgroundImageView;
+@property (nonatomic, assign) CGFloat      fanWidth;
+@property (nonatomic, strong) UIBezierPath *path;
 @end
 
 @implementation KIWheelSectionView
 - (void)setFrame:(CGRect)frame {
     [super setFrame:frame];
-    [self.backgroundImageView setFrame:self.bounds];
 }
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    [self addSubview:self.backgroundImageView];
-    [self sendSubviewToBack:self.backgroundImageView];
-        self.backgroundColor = [UIColor yellowColor];
-}
-
-- (UIImageView *)backgroundImageView {
-    if (_backgroundImageView == nil) {
-        _backgroundImageView = [[UIImageView alloc] init];
-        [_backgroundImageView setContentMode:UIViewContentModeScaleAspectFit];
-    }
-    return _backgroundImageView;
-}
-
-- (CGFloat)radianWithPoint:(CGPoint)point toOriginalPoint:(CGPoint)originalPoint {
-    double radian = 0;
-    double dx = ABS(point.x - originalPoint.x);
-    double dy = ABS(point.y - originalPoint.y);
-    radian = atan2(dy, dx);
-    
-//    if (point.x < originalPoint.x) {
-//        radian = M_PI - radian;
-//    }
-//    if (point.y > originalPoint.y) {
-//        radian = 2.0 * M_PI - radian;
-//    }
-//    if (radian > M_PI_2) {
-//        radian -= M_PI_2;
-//    } else {
-//        radian += 3 * M_PI * 0.5;
-//    }
-    
-    radian = ABS(2 * M_PI - radian);
-    
-    return radian;
-}
-
-- (void)drawRect:(CGRect)rect {
-    [super drawRect:rect];
     
     CGFloat radius = CGRectGetHeight(self.bounds);
-    CGFloat width = CGRectGetWidth(self.bounds);
-    CGPoint center = CGPointMake(width * 0.5, radius);
+    CGPoint center = CGPointMake(CGRectGetMidX(self.bounds), radius);
     
-    // 一条直角边长为 width * 0.5, 斜边长为 radius, 根据勾股定理算出算出另一条直角边的长
-    CGFloat distance = sqrt(pow(radius, 2) - pow(width * 0.5, 2));
+    CGFloat r1 = -M_PI_2 - self.fanWidth * 0.5;
+    CGFloat r2 = -M_PI_2 + self.fanWidth * 0.5;
     
-    CGPoint p1 = CGPointMake(width * 0.5 * -1, distance);
-    CGPoint p2 = CGPointMake(width * 0.5, distance);
-    
-    CGFloat r1 =  -M_PI_2-0.55;
-    CGFloat r2 =  -M_PI_2+0.55;
-    
-    NSLog(@"%f--%f", r1, -M_PI_2-0.55);
-    
-    // 画圆弧
-    // Center圆心
-    // radius:半径
-    // startAngle起始角度
-    // endAngle:结束角度
-    // clockwise:Yes 顺时针 No逆时针
-//    CGPoint center = CGPointMake(self.bounds.size.width * 0.5, self.bounds.size.height * 0.5);
-    //    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:center radius:100 startAngle:0 endAngle:M_PI_2 clockwise:NO];
-    
-    //    [path stroke];
-    
-    // 画扇形
-    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:center radius:radius startAngle:r1 endAngle:r2 clockwise:YES];
-    
-    [path addLineToPoint:center];
-    
-    //    [path addLineToPoint:CGPointMake(self.bounds.size.height * 0.5 + 100, self.bounds.size.height * 0.5)];
-    // 关闭路径:从路径的终点连接到起点
-    //    [path closePath];
-    // 设置填充颜色
-    [[UIColor redColor] setFill];
-    
-    // 设置描边颜色
-    [[UIColor greenColor] setStroke];
-    
-    //    [path stroke];
-    // 如果路径不是封闭的,默认会关闭路径
-    [path fill];
+    self.path = [UIBezierPath bezierPathWithArcCenter:center radius:radius startAngle:r1 endAngle:r2 clockwise:YES];
+    [self.path addLineToPoint:center];
+    CAShapeLayer *layer = [CAShapeLayer layer];
+    layer.path = self.path.CGPath;
+    [self.layer setMask:layer];
+}
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+    return [self.path containsPoint:point];
 }
 
 - (void)setBackgroundImage:(UIImage *)backgroundImage {
     _backgroundImage = backgroundImage;
-    [self.backgroundImageView setImage:backgroundImage];
+    if (_backgroundImage == nil) {
+        [self setBackgroundColor:[UIColor whiteColor]];
+    } else {
+        [self setBackgroundColor:[UIColor colorWithPatternImage:_backgroundImage]];
+    }
 }
 
 @end
@@ -124,7 +63,6 @@
 @interface KIWheelView ()
 @property (nonatomic, assign) CGFloat           deltaAngle;
 @property (nonatomic, strong) UIView            *container;
-@property (nonatomic, strong) UIImageView       *containerImageView;
 @property (nonatomic, strong) NSMutableArray    *sections;
 @property (nonatomic, strong) NSMutableArray    *sectionViews;
 @property (nonatomic, assign) CGPoint           startPoint;
@@ -133,6 +71,7 @@
 @property (nonatomic, assign) NSInteger         lastIndex;
 @property (nonatomic, assign) NSInteger         selectedIndex;
 @property (nonatomic, assign) CGPoint           originalPoint;
+@property (nonatomic, strong) UIBezierPath      *path;
 
 @property (nonatomic, copy) KIWheelViewDidLoadSectionViewBlock wheelViewDidLoadSectionViewBlock;
 @property (nonatomic, copy) KIWheelViewShouldStartRotateBlock  wheelViewShouldStartRotateBlock;
@@ -143,11 +82,8 @@
 
 @implementation KIWheelView
 
-- (void)setFrame:(CGRect)frame {
-    [super setFrame:frame];
-    [self.container setFrame:self.bounds];
-    [self.containerImageView setFrame:self.bounds];
-    [self setOriginalPoint:CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds))];
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+    return [self.path containsPoint:point];
 }
 
 #pragma mark - Touches
@@ -155,16 +91,10 @@
     UITouch *touch = [touches anyObject];
     CGPoint point = [touch locationInView:self];
     
-    CGFloat distance = [self distanceWithPoint:point toOriginalPoint:self.originalPoint];
-    
     if (self.wheelViewShouldStartRotateBlock != nil) {
         if (self.wheelViewShouldStartRotateBlock(self) == NO) {
             return;
         }
-    }
-    
-    if (distance > CGRectGetWidth(self.bounds) / 2) {
-        return;
     }
     
     if (self.wheelViewWillStartRotateBlock != nil) {
@@ -225,20 +155,6 @@
 }
 
 #pragma mark - Methods
-- (CGFloat)distanceWithPoint:(CGPoint)point toOriginalPoint:(CGPoint)originalPoint {
-    double distance = 0;
-    double dx = ABS(point.x - originalPoint.x);
-    double dy = ABS(point.y - originalPoint.y);
-    distance = sqrt(pow(dx, 2) + pow(dy, 2));
-    return distance;
-}
-
-- (CGPoint)convertPoint:(CGPoint)point toOriginalPoint:(CGPoint)originalPoint {
-    double dx = point.x - originalPoint.x;
-    double dy = point.y - originalPoint.y;
-    return CGPointMake(dx, dy * -1);
-}
-
 - (NSInteger)calculateIndex:(BOOL)moveToNewPoint {
     NSInteger tempIndex = 0;
     CGFloat radians = atan2f(self.container.transform.b, self.container.transform.a);
@@ -272,39 +188,48 @@
 }
 
 - (void)buildWheel {
-    self.sections = [[NSMutableArray alloc] initWithCapacity:self.numberOfSections];
+    [self setOriginalPoint:CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds))];
     
+    for (KIWheelSectionView *view in self.sectionViews) {
+        [view removeFromSuperview];
+    }
+    [self.sectionViews removeAllObjects];
+    [self.sections removeAllObjects];
+    [self.container setFrame:self.bounds];
     [self addSubview:self.container];
-    [self.container setBackgroundColor:[UIColor clearColor]];
-
     
-    CGPoint point = CGPointMake(CGRectGetWidth(self.container.bounds) / 2.0,
-                                CGRectGetHeight(self.container.bounds) / 2.0);
+    CGPoint point = CGPointMake(CGRectGetWidth(self.container.bounds) * 0.5,
+                                CGRectGetHeight(self.container.bounds) * 0.5);
     
     CGFloat angle = M_PI * 2 / self.numberOfSections;
     CGFloat perimeter = M_PI * CGRectGetWidth(self.bounds);
     CGFloat width = perimeter / self.numberOfSections;
-    CGFloat height = CGRectGetHeight(self.container.bounds) / 2.0;
-
-    for (KIWheelSectionView *view in self.sectionViews) {
-        [view removeFromSuperview];
-    }
+    CGFloat height = CGRectGetHeight(self.container.bounds) * 0.5;
+    CGFloat fanWidth = M_PI * 2 / self.numberOfSections;
     
     for (int i=0; i<self.numberOfSections; i++) {
         KIWheelSectionView *view = [[KIWheelSectionView alloc] init];
         [view setFrame:CGRectMake(0, 0, width, height)];
         view.layer.anchorPoint = CGPointMake(0.5f, 1.0f);
         view.layer.position    = point;
-//        view.transform         = CGAffineTransformMakeRotation(angle * i);
-        view.backgroundColor   = [UIColor clearColor];
-        [self.container addSubview:view];
+        view.transform         = CGAffineTransformMakeRotation(angle * i);
+//        view.backgroundColor   = [UIColor whiteColor];
+        view.fanWidth          = fanWidth;
+        view.backgroundImage   = self.sectionImage;
         
+        [self.container addSubview:view];
         [self.sectionViews addObject:view];
         
         if (self.wheelViewDidLoadSectionViewBlock != nil) {
             self.wheelViewDidLoadSectionViewBlock(self, i, view);
         }
     }
+    
+    self.path = [UIBezierPath bezierPathWithOvalInRect:self.container.bounds];
+    [self.path addLineToPoint:point];
+    CAShapeLayer *layer = [CAShapeLayer layer];
+    layer.path = self.path.CGPath;
+    [self.layer setMask:layer];
     
     if (self.numberOfSections % 2 == 0) {
         [self buildSectionsWithEven];
@@ -389,24 +314,16 @@
     if (_sectionImage != sectionImage) {
         _sectionImage = sectionImage;
         for (KIWheelSectionView *view in self.sectionViews) {
-            [view setBackgroundImage:sectionImage];
+            [view setBackgroundImage:_sectionImage];
         }
     }
 }
 
-- (void)setContainerImage:(UIImage *)containerImage {
-    if (_containerImage != containerImage) {
-        _containerImage = containerImage;
-        [self.containerImageView setImage:containerImage];
-        [self.containerImageView setContentMode:UIViewContentModeScaleAspectFit];
-        if (_containerImage == nil) {
-            [_containerImageView removeFromSuperview];
-            _containerImageView = nil;
-        } else {
-            [self.container addSubview:self.containerImageView];
-            [self.container sendSubviewToBack:self.containerImageView];
-        }
+- (NSMutableArray *)sections {
+    if (_sections == nil) {
+        _sections = [[NSMutableArray alloc] init];
     }
+    return _sections;
 }
 
 - (NSMutableArray *)sectionViews {
@@ -421,13 +338,6 @@
         _container = [[UIView alloc] initWithFrame:self.bounds];
     }
     return _container;
-}
-
-- (UIImageView *)containerImageView {
-    if (_containerImageView == nil) {
-        _containerImageView = [[UIImageView alloc] initWithFrame:self.bounds];
-    }
-    return _containerImageView;
 }
 
 - (void)setDidLoadSectionViewBlock:(KIWheelViewDidLoadSectionViewBlock)block {

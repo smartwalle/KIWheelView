@@ -11,13 +11,32 @@
 #import "KIWheelView.h"
 
 @interface ViewController ()
-
+@property (nonatomic, strong) KIWheelView *wheelView;
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.wheelView = (KIWheelView *)[self.view viewWithTag:1001];
+    
+    
+    [self.wheelView setDidLoadSectionViewBlock:^(KIWheelView *wheelView, NSInteger index, KIWheelSectionView *sectionView) {
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, sectionView.bounds.size.width, 50)];
+        [label setText:[NSString stringWithFormat:@"%d", index]];
+        [label setFont:[UIFont boldSystemFontOfSize:30]];
+        [label setTextColor:[UIColor whiteColor]];
+        [label setTextAlignment:NSTextAlignmentCenter];
+        [sectionView addSubview:label];
+        
+        if (index % 2 == 0) {
+            [sectionView setBackgroundColor:[UIColor redColor]];
+        } else {
+            [sectionView setBackgroundColor:[UIColor greenColor]];
+        }
+        
+    }];
     
 //    KIWheelView *view = [[KIWheelView alloc] initWithFrame:CGRectMake(0, 0, 320, 320)];
 //    [view setBackgroundColor:[UIColor redColor]];
@@ -49,6 +68,11 @@
 //    
 //    [self.view addSubview:view];
 
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self.wheelView reload];
 }
 
 - (void)didReceiveMemoryWarning {
