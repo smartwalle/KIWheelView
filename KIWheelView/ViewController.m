@@ -12,6 +12,8 @@
 
 @interface ViewController ()
 @property (nonatomic, strong) KIWheelView *wheelView;
+@property (nonatomic, strong) KIWheelView *wheelView2;
+@property (nonatomic, strong) KIWheelView *wheelView3;
 @end
 
 @implementation ViewController
@@ -20,7 +22,7 @@
     [super viewDidLoad];
     
     self.wheelView = (KIWheelView *)[self.view viewWithTag:1001];
-    
+    self.wheelView2 = (KIWheelView *)[self.view viewWithTag:1002];
     
     [self.wheelView setDidLoadSectionViewBlock:^(KIWheelView *wheelView, NSInteger index, KIWheelSectionView *sectionView) {
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, sectionView.bounds.size.width, 50)];
@@ -35,7 +37,14 @@
         } else {
             [sectionView setBackgroundColor:[UIColor greenColor]];
         }
-        
+    }];
+    
+    [self.wheelView2 setDidLoadSectionViewBlock:^(KIWheelView *wheelView, NSInteger index, KIWheelSectionView *sectionView) {
+        if (index % 2 == 0) {
+            [sectionView setBackgroundColor:[UIColor redColor]];
+        } else {
+            [sectionView setBackgroundColor:[UIColor greenColor]];
+        }
     }];
     
 //    KIWheelView *view = [[KIWheelView alloc] initWithFrame:CGRectMake(0, 0, 320, 320)];
@@ -73,6 +82,7 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self.wheelView reload];
+    [self.wheelView2 reload];
 }
 
 - (void)didReceiveMemoryWarning {

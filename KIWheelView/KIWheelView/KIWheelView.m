@@ -22,9 +22,6 @@
 @end
 
 @implementation KIWheelSectionView
-- (void)setFrame:(CGRect)frame {
-    [super setFrame:frame];
-}
 
 - (void)layoutSubviews {
     [super layoutSubviews];

@@ -4,6 +4,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -15,11 +16,11 @@
                         <viewControllerLayoutGuide type="bottom" id="Zb7-7W-mAZ"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view tag="1001" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bDu-Me-RBZ" customClass="KIWheelView">
-                                <rect key="frame" x="-150" y="461" width="620" height="620"/>
+                                <rect key="frame" x="-160" y="380" width="640" height="640"/>
                                 <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="bDu-Me-RBZ" secondAttribute="height" multiplier="1:1" id="rw1-ek-BBf"/>
@@ -30,14 +31,30 @@
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                             </view>
+                            <view tag="1002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oyI-XW-Dta" customClass="KIWheelView">
+                                <rect key="frame" x="60" y="140" width="200" height="200"/>
+                                <color key="backgroundColor" red="0.85882352939999995" green="0.94901960780000005" blue="0.2470588235" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="9NL-ns-gfr"/>
+                                    <constraint firstAttribute="width" constant="200" id="Qyn-nT-v0c"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="numberOfSections">
+                                        <integer key="value" value="30"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </view>
                         </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="bDu-Me-RBZ" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="-150" id="Sji-qq-nKb"/>
-                            <constraint firstAttribute="trailing" secondItem="bDu-Me-RBZ" secondAttribute="trailing" constant="-150" id="gYZ-29-gAc"/>
-                            <constraint firstItem="bDu-Me-RBZ" firstAttribute="top" secondItem="1jO-h9-iE7" secondAttribute="bottom" constant="441" id="vNZ-BZ-RFu"/>
+                            <constraint firstItem="bDu-Me-RBZ" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" multiplier="2:1" id="1V2-c2-1gI"/>
+                            <constraint firstItem="oyI-XW-Dta" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="GHt-ht-kzl"/>
+                            <constraint firstAttribute="bottom" secondItem="bDu-Me-RBZ" secondAttribute="top" constant="100" id="l3F-gn-PnT"/>
+                            <constraint firstItem="bDu-Me-RBZ" firstAttribute="centerX" secondItem="oyI-XW-Dta" secondAttribute="centerX" id="pV7-xV-KxW"/>
+                            <constraint firstItem="oyI-XW-Dta" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="xE2-nu-ub0"/>
                         </constraints>
                     </view>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
